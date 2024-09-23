@@ -20,7 +20,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 CREDENTIALS_FILE = 'credentials.json'
 TOKEN_FILE = 'token.json'
 # Set up OpenAI API key
-openai.api_key = 'your-openai-api-key'
+openai.api_key = 'openai-api-key'
 
 
 # Gmail API authentication
