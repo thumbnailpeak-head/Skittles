@@ -9,8 +9,12 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
+import src.input.text.text_endpoint
+
 # FastAPI app
 app = FastAPI()
+app.include_router(src.input.text.text_endpoint.router, prefix="/pdfs", tags=["pdfs"])
+
 
 # OAuth 2.0 scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
