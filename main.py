@@ -1,6 +1,5 @@
 import base64
 import json
-import openai
 import os
 
 from fastapi import FastAPI, Request, HTTPException
@@ -8,6 +7,7 @@ from google.auth.transport.requests import Request as GoogleRequest
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from src.llm.chatgpt import chat_with_gpt4
 
 import src.input.text.text_endpoint
 
@@ -24,8 +24,6 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 # Path to credentials.json and token.json
 CREDENTIALS_FILE = 'credentials.json'
 TOKEN_FILE = 'token.json'
-# Set up OpenAI API key
-openai.api_key = 'openai-api-key'
 
 
 # Gmail API authentication
@@ -119,7 +117,7 @@ async def handle_gmail_notification(request: Request):
                                 print(f"Email content: {email_content}")
 
                                 # Step 4: Generate a reply using GPT-4
-                                gpt_reply = generate_gpt_reply(email_content)
+                                gpt_reply = chat_with_gpt4(f"Here is an email I received:\n\n{email_content}\n\nWrite a polite, professional reply.")
                                 if gpt_reply:
                                     print(f"Generated GPT-4 reply: {gpt_reply}")
 
@@ -141,24 +139,6 @@ async def handle_gmail_notification(request: Request):
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
-
-
-def generate_gpt_reply(email_content):
-    """Use OpenAI's GPT-4 to generate a reply to the email."""
-    try:
-        prompt = f"Here is an email I received:\n\n{email_content}\n\nWrite a polite, professional reply."
-        response = openai.Completion.create(
-            model="gpt-4",
-            prompt=prompt,
-            max_tokens=200,
-            n=1,
-            stop=None,
-            temperature=0.7
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        print(f"Error in GPT-4 response generation: {e}")
-        return None
 
 
 def get_email_body(message):
