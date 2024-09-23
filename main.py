@@ -15,6 +15,7 @@ app = FastAPI()
 # OAuth 2.0 scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
+
 # Need to configure offline
 # Path to credentials.json and token.json
 CREDENTIALS_FILE = 'credentials.json'
