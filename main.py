@@ -10,10 +10,12 @@ from googleapiclient.discovery import build
 from src.llm.chatgpt import chat_with_gpt4
 
 import src.input.text.text_endpoint
+import src.use_cases.chat_bot
 
 # FastAPI app
 app = FastAPI()
 app.include_router(src.input.text.text_endpoint.router, prefix="/pdfs", tags=["pdfs"])
+app.include_router(src.use_cases.chat_bot.router, prefix="/chatbot", tags=["chatbot"])
 
 
 # OAuth 2.0 scopes
