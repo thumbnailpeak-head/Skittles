@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from src.llm.chatgpt import chat_with_gpt4
@@ -14,6 +16,4 @@ class Message(BaseModel):
 # Endpoint for chatbot communication
 @router.post("/chat")
 async def chat(message: Message):
-    user_input = message.text
-
-    return chat_with_gpt4(user_input)
+    return {"response": chat_with_gpt4(message.text)}
