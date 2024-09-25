@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from src.llm.chatgpt import chat_with_gpt4
+from fastapi.middleware.cors import CORSMiddleware
 
 import src.input.text.text_endpoint
 import src.use_cases.chat_bot
@@ -16,6 +17,12 @@ import src.use_cases.chat_bot
 app = FastAPI()
 app.include_router(src.input.text.text_endpoint.router, prefix="/pdfs", tags=["pdfs"])
 app.include_router(src.use_cases.chat_bot.router, prefix="/chatbot", tags=["chatbot"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this for production, e.g., ["http://localhost:3000"]
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # OAuth 2.0 scopes
