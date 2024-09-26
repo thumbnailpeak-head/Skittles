@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from src.llm.chatgpt import chat_with_gpt4
