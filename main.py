@@ -14,6 +14,7 @@ import src.input.text.text_endpoint
 import src.use_cases.chat_bot
 import src.use_cases.voice_bot
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 
 # FastAPI app
@@ -27,7 +28,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/", StaticFiles(directory="/Users/junxie/Projects/Skittles/static", html=True), name="static")
+current_directory = Path(__file__).parent
+
+# Define the relative path to the static folder
+static_directory = current_directory / "static"
+
+app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
 
 # OAuth 2.0 scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
