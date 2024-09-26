@@ -12,18 +12,28 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import src.input.text.text_endpoint
 import src.use_cases.chat_bot
+import src.use_cases.voice_bot
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+
 
 # FastAPI app
 app = FastAPI()
 app.include_router(src.input.text.text_endpoint.router, prefix="/pdfs", tags=["pdfs"])
 app.include_router(src.use_cases.chat_bot.router, prefix="/chatbot", tags=["chatbot"])
+app.include_router(src.use_cases.voice_bot.router, prefix="/voicebot", tags=["voicebot"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Adjust this for production, e.g., ["http://localhost:3000"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
+current_directory = Path(__file__).parent
 
+# Define the relative path to the static folder
+static_directory = current_directory / "static"
+
+app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
 
 # OAuth 2.0 scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']

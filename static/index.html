@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket VoiceBot with Audio Playback</title>
+</head>
+<body>
+    <h1>VoiceBot WebSocket with Audio Playback</h1>
+    <button id="start-btn">Start Recording</button>
+    <button id="stop-btn" disabled>Stop Recording</button>
+    <p id="status">Status: Not connected</p>
+    <p id="bot-response"></p>
+
+    <script>
+        let websocket;
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioPlayer = new Audio();  // Create an Audio object for playback
+
+        const startBtn = document.getElementById("start-btn");
+        const stopBtn = document.getElementById("stop-btn");
+        const statusElement = document.getElementById("status");
+        const responseElement = document.getElementById("bot-response");
+
+        // Connect to the WebSocket endpoint
+        function connectWebSocket() {
+            websocket = new WebSocket("ws://127.0.0.1:8000/voicebot/chat");
+
+            websocket.onopen = function () {
+                statusElement.textContent = "Status: Connected";
+                console.log("WebSocket connection established.");
+            };
+
+            websocket.onmessage = function (event) {
+                if (typeof event.data === "string") {
+                    // Handle text message (bot's response)
+                    responseElement.textContent = "Bot Response: " + event.data;
+                    console.log("Received from server:", event.data);
+                } else {
+                    // Handle binary message (audio data)
+                    console.log("Received audio data from server");
+                    const audioBlob = new Blob([event.data], { type: 'audio/mpeg' });  // Assuming mp3 format
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();  // Play the audio
+                }
+            };
+
+            websocket.onclose = function () {
+                statusElement.textContent = "Status: Disconnected";
+                console.log("WebSocket connection closed.");
+            };
+
+            websocket.onerror = function (error) {
+                console.error("WebSocket error:", error);
+            };
+        }
+
+        // Function to start recording audio
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = function (event) {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = function () {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        audioChunks = [];
+
+                        // Send the recorded audio to the server via WebSocket
+                        websocket.send(audioBlob);
+                        console.log("Sent audio to server");
+                    };
+
+                    mediaRecorder.start();
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                })
+                .catch(function (err) {
+                    console.error("Error accessing the microphone", err);
+                });
+        }
+
+        // Function to stop recording audio
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        // Event listeners for starting and stopping recording
+        startBtn.addEventListener("click", function () {
+            connectWebSocket();  // Connect to WebSocket before recording
+            startRecording();
+        });
+
+        stopBtn.addEventListener("click", function () {
+            stopRecording();
+        });
+    </script>
+</body>
+</html>
